@@ -48,5 +48,3 @@ class Scraper:
             ]) if detail is not None]
             for id, list in search.items()
         }
-
-

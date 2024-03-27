@@ -11,7 +11,7 @@ async def main():
         print(result.title, result.url)
 
     # 调用 detail 方法获取详细信息
-    detail_info = melonbooks.detail(search_results[0].url)
+    detail_info = detail(search_results[0].url)
     if detail_info:
         print('Title:', detail_info.title)
         print('Date:', detail_info.date)
@@ -29,4 +29,4 @@ async def test():
 if __name__ == "__main__":
     import asyncio
 
-    asyncio.run(test())
+    asyncio.run(main())

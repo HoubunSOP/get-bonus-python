@@ -1,6 +1,5 @@
 import re
 from typing import List, Optional
-import ssl
 import requests
 from bs4 import BeautifulSoup
 
@@ -56,9 +55,34 @@ def enforce_https(url: str) -> str:
     return url
 
 
+def detail(url: str) -> Optional[Detail]:
+    response = requests.get(url)
+    html = response.text
+    soup = BeautifulSoup(html, 'html.parser')
+    title = soup.select_one('.page-header').text.strip() if soup.select_one('.page-header') else ''
+    date = resolve_date(
+        soup.select_one('.row_sale_date').text.strip() if soup.select_one('.row_sale_date') else 'qwq')
+    price = resolve_price(soup.select_one('.price .yen').text.strip() if soup.select_one('.price .yen') else '')
+    priv_items = soup.select('.priv-item')
+    items = []
+    for item in priv_items:
+        img = item.select_one('.priv_img')['src']
+        img = enforce_https(img)
+        info = item.select_one('.priv-item_info').text.strip() if item.select_one('.priv-item_info') else ''
+        items.append(DetailItem(image=img, description=remove_extra_spaces(info)))
+    return Detail(
+        provider='Melonbooks',
+        title=title,
+        date=date,
+        price=price,
+        url=url,
+        items=items
+    )
+
+
 class Melonbooks:
     def __init__(self):
-        self.base_url = 'http://www.melonbooks.co.jp'
+        self.base_url = 'https://www.melonbooks.co.jp'
 
     def search(self, text: str, options: SearchOptions) -> List[SearchResult]:
         query_params = {
@@ -86,27 +110,3 @@ class Melonbooks:
                 url=self.base_url + a['href']
             ))
         return results
-
-    def detail(self, url: str) -> Optional[Detail]:
-        response = requests.get(url)
-        html = response.text
-        soup = BeautifulSoup(html, 'html.parser')
-        title = soup.select_one('.page-header').text.strip() if soup.select_one('.page-header') else ''
-        date = resolve_date(
-            soup.select_one('.row_sale_date').text.strip() if soup.select_one('.row_sale_date') else 'qwq')
-        price = resolve_price(soup.select_one('.price .yen').text.strip() if soup.select_one('.price .yen') else '')
-        priv_items = soup.select('.priv-item')
-        items = []
-        for item in priv_items:
-            img = item.select_one('.priv_img')['src']
-            img = enforce_https(img)
-            info = item.select_one('.priv-item_info').text.strip() if item.select_one('.priv-item_info') else ''
-            items.append(DetailItem(image=img, description=remove_extra_spaces(info)))
-        return Detail(
-            provider='Melonbooks',
-            title=title,
-            date=date,
-            price=price,
-            url=url,
-            items=items
-        )
