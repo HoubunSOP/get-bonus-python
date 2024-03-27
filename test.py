@@ -1,4 +1,4 @@
-from melonbooks import Melonbooks
+from melonbooks import Melonbooks, resolve_date
 from models import SearchOptions
 
 melonbooks = Melonbooks()
@@ -22,7 +22,11 @@ async def main():
             print('Description:', item.description)
 
 
+async def test():
+    resolve_date('発売日：2022年04月27日')
+
+
 if __name__ == "__main__":
     import asyncio
 
-    asyncio.run(main())
+    asyncio.run(test())

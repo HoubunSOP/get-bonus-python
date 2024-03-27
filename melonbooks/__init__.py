@@ -33,9 +33,11 @@ def resolve_date(text: Optional[str]) -> Optional[str]:
     """Resolve date from the given text."""
     if not text:
         return None
-    match = re.match(r'(\d+)年(\d+)月(\d+)日', text)
+    match = re.match(r'(.+?)(\d+)年(\d+)月(\d+)日', text)
     if match:
-        return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
+        prefix, year, month, day = match.groups()
+        year, month, day = map(int, (year, month, day))
+        return f"{year}-{month}-{day}"
     return None
 
 
@@ -90,7 +92,8 @@ class Melonbooks:
         html = response.text
         soup = BeautifulSoup(html, 'html.parser')
         title = soup.select_one('.page-header').text.strip() if soup.select_one('.page-header') else ''
-        date = resolve_date(soup.select_one('.row_sale_date').text.strip() if soup.select_one('.row_sale_date') else '')
+        date = resolve_date(
+            soup.select_one('.row_sale_date').text.strip() if soup.select_one('.row_sale_date') else 'qwq')
         price = resolve_price(soup.select_one('.price .yen').text.strip() if soup.select_one('.price .yen') else '')
         priv_items = soup.select('.priv-item')
         items = []
